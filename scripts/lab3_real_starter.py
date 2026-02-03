@@ -29,9 +29,9 @@ class OdometryPublisher:
 
         ######### Your code starts here #########
         # TurtleBot3 Burger parameters from manual (https://emanual.robotis.com/docs/en/platform/turtlebot3/overview/)
-        self.TICK_TO_RAD =
-        self.wheel_radius =
-        self.wheel_separation =
+        self.TICK_TO_RAD = 2.0 * math.pi / 4096.0  # Convert encoder ticks to radians
+        self.wheel_radius = 0.033
+        self.wheel_separation = 0.160
         ######### Your code ends here #########
 
         self.current_time = rospy.Time.now()
@@ -56,6 +56,30 @@ class OdometryPublisher:
 
         ######### Your code starts here #########
         # add odometry equations to calculate robot's self.x, self.y, self.theta given encoder values
+
+        # ticks to radians
+        delta_left = (self.left_encoder - self.last_left_encoder) * self.TICK_TO_RAD
+        delta_right = (self.right_encoder - self.last_right_encoder) * self.TICK_TO_RAD
+
+        # increment encoder counts
+        delta_left = self.left_encoder - self.last_left_encoder
+        delta_right = self.right_encoder - self.last_right_encoder
+
+        self.last_left_encoder = self.left_encoder
+        self.last_right_encoder = self.right_encoder
+
+        # wheel displacements
+        d_left = delta_left * self.wheel_radius
+        d_right = delta_right * self.wheel_radius
+
+        # robot motion
+        delta_s = (d_right + d_left) / 2.0
+        delta_theta = (d_right - d_left) / self.wheel_separation
+
+        # pose update
+        self.x += delta_s * math.cos(self.theta + delta_theta / 2.0)
+        self.y += delta_s * math.sin(self.theta + delta_theta / 2.0)
+        self.theta += delta_theta
 
         ######### Your code ends here #########
 
