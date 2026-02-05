@@ -59,10 +59,6 @@ class OdometryPublisher:
         dt = (self.current_time - self.last_time).to_sec()
 
         ######### Your code starts here #########
-        self.current_time = rospy.Time.now()
-        dt = (self.current_time - self.last_time).to_sec()
-        if dt <= 0:
-            return
 
         delta_left_ticks  = self.left_encoder  - self.last_left_encoder
         delta_right_ticks = self.right_encoder - self.last_right_encoder
