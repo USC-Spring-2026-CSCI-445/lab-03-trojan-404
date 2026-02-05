@@ -59,34 +59,30 @@ class OdometryPublisher:
         dt = (self.current_time - self.last_time).to_sec()
 
         ######### Your code starts here #########
-        # add odometry equations to calculate robot's self.x, self.y, self.theta given encoder values
-        print("Updating odometry...")
-        
-        # ticks to radians
-        delta_left = (self.left_encoder - self.last_left_encoder) * self.TICK_TO_RAD
-        delta_right = (self.right_encoder - self.last_right_encoder) * self.TICK_TO_RAD
+        self.current_time = rospy.Time.now()
+        dt = (self.current_time - self.last_time).to_sec()
+        if dt <= 0:
+            return
 
-        # increment encoder counts
-        delta_left = self.left_encoder - self.last_left_encoder
-        delta_right = self.right_encoder - self.last_right_encoder
+        delta_left_ticks  = self.left_encoder  - self.last_left_encoder
+        delta_right_ticks = self.right_encoder - self.last_right_encoder
 
         self.last_left_encoder = self.left_encoder
         self.last_right_encoder = self.right_encoder
 
-        # wheel displacements
-        d_left = delta_left * self.wheel_radius
-        d_right = delta_right * self.wheel_radius
+        delta_left_rad  = delta_left_ticks  * self.TICK_TO_RAD
+        delta_right_rad = delta_right_ticks * self.TICK_TO_RAD
 
-        # robot motion
+        d_left  = delta_left_rad  * self.wheel_radius
+        d_right = delta_right_rad * self.wheel_radius
+
         delta_s = (d_right + d_left) / 2.0
         delta_theta = (d_right - d_left) / self.wheel_separation
 
-        # pose update
-        self.x += delta_s * math.cos(self.theta + delta_theta / 2.0)
-        self.y += delta_s * math.sin(self.theta + delta_theta / 2.0)
+        self.x += delta_s * math.cos(self.theta + delta_theta/2.0)
+        self.y += delta_s * math.sin(self.theta + delta_theta/2.0)
         self.theta += delta_theta
 
-        print(f"Position: x={self.x}, y={self.y}, theta={self.theta}")
 
         ######### Your code ends here #########
 
